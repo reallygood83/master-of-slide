@@ -6,9 +6,9 @@ import poster from './assets/poster.jpg';
 
 export const design: DesignSystem = {
   palette: {
-    bg: '#0f0e0b',
+    bg: '#ddd0a6',
     text: '#101010',
-    accent: '#bf4503',
+    accent: '#931b67',
   },
   fonts: {
     display:
@@ -22,18 +22,21 @@ export const design: DesignSystem = {
   radius: 0,
 };
 
-const ink = 'var(--osd-text)';
+const ink = design.palette.text;
 const cream = '#fffaf0';
-const orange = 'var(--osd-accent)';
+const orange = design.palette.accent;
 const yellow = '#ffd84d';
 const mint = '#24d6a3';
 const blue = '#1b78ff';
 const purple = '#7d4cff';
 const red = '#ff314f';
-const muted = 'color-mix(in srgb, var(--osd-text) 62%, var(--osd-bg))';
+const muted = '#6c6257';
 
 const mono =
   '"JetBrains Mono", "SF Mono", Menlo, Consolas, "Apple SD Gothic Neo", "Malgun Gothic", monospace';
+
+const hero = (scale = 1) => design.typeScale.hero * scale;
+const body = (scale = 1) => design.typeScale.body * scale;
 
 const fill: CSSProperties = {
   width: '100%',
@@ -41,8 +44,8 @@ const fill: CSSProperties = {
   position: 'relative',
   overflow: 'hidden',
   boxSizing: 'border-box',
-  background: 'var(--osd-bg)',
-  color: 'var(--osd-text)',
+  background: design.palette.bg,
+  color: design.palette.text,
   fontFamily: 'var(--osd-font-body)',
   wordBreak: 'keep-all',
   overflowWrap: 'anywhere',
@@ -58,7 +61,7 @@ function PageShell({
   children,
   label,
   section,
-  bg = 'var(--osd-bg)',
+  bg = design.palette.bg,
 }: {
   children: ReactNode;
   label: string;
@@ -73,7 +76,7 @@ function PageShell({
           top: 34,
           left: 92,
           fontFamily: mono,
-          fontSize: 'calc(var(--osd-size-body) * 0.58)',
+          fontSize: body(0.58),
           fontWeight: 950,
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
@@ -91,7 +94,7 @@ function PageShell({
           padding: '10px 18px',
           boxShadow: `8px 8px 0 ${ink}`,
           fontFamily: mono,
-          fontSize: 'calc(var(--osd-size-body) * 0.58)',
+          fontSize: body(0.58),
           fontWeight: 950,
         }}
       >
@@ -104,7 +107,7 @@ function PageShell({
           bottom: 44,
           color: muted,
           fontFamily: mono,
-          fontSize: 'calc(var(--osd-size-body) * 0.58)',
+          fontSize: body(0.58),
           fontWeight: 850,
         }}
       >
@@ -134,7 +137,7 @@ function Stamp({
         boxShadow: `8px 8px 0 ${ink}`,
         transform: `rotate(${rotate}deg)`,
         fontFamily: mono,
-        fontSize: 'calc(var(--osd-size-body) * 0.74)',
+        fontSize: body(0.74),
         fontWeight: 950,
       }}
     >
@@ -174,7 +177,7 @@ function BrutalCard({
           padding: '8px 14px',
           marginBottom: 18,
           fontFamily: mono,
-          fontSize: 'calc(var(--osd-size-body) * 0.58)',
+          fontSize: body(0.58),
           fontWeight: 950,
         }}
       >
@@ -183,7 +186,7 @@ function BrutalCard({
       <p
         style={{
           margin: 0,
-          fontSize: 'calc(var(--osd-size-body) * 0.82)',
+          fontSize: body(0.82),
           lineHeight: 1.44,
           fontWeight: 760,
         }}
@@ -206,7 +209,7 @@ function BigNumber({ value, label, color }: { value: string; label: string; colo
     >
       <div
         style={{
-          fontSize: 'calc(var(--osd-size-hero) * 0.65)',
+          fontSize: hero(0.65),
           lineHeight: 0.95,
           fontWeight: 950,
           letterSpacing: '-0.04em',
@@ -217,7 +220,7 @@ function BigNumber({ value, label, color }: { value: string; label: string; colo
       <div
         style={{
           marginTop: 16,
-          fontSize: 'calc(var(--osd-size-body) * 0.76)',
+          fontSize: body(0.76),
           lineHeight: 1.34,
           fontWeight: 820,
         }}
@@ -241,7 +244,7 @@ function Lane({ title, items, color }: { title: string; items: string[]; color: 
       <h3
         style={{
           margin: 0,
-          fontSize: 'calc(var(--osd-size-body) * 1.1)',
+          fontSize: body(1.1),
           lineHeight: 1.12,
           fontWeight: 950,
         }}
@@ -252,7 +255,7 @@ function Lane({ title, items, color }: { title: string; items: string[]; color: 
         style={{
           margin: '26px 0 0',
           paddingLeft: 32,
-          fontSize: 'calc(var(--osd-size-body) * 0.76)',
+          fontSize: body(0.76),
           lineHeight: 1.42,
           fontWeight: 720,
         }}
@@ -295,7 +298,7 @@ const Cover: Page = () => (
         style={{
           margin: '58px 0 34px',
           fontFamily: 'var(--osd-font-display)',
-          fontSize: 'var(--osd-size-hero)',
+          fontSize: hero(),
           lineHeight: 1.02,
           letterSpacing: '-0.035em',
           fontWeight: 950,
@@ -309,7 +312,7 @@ const Cover: Page = () => (
         style={{
           width: 980,
           margin: 0,
-          fontSize: 'calc(var(--osd-size-body) * 1.13)',
+          fontSize: body(1.13),
           lineHeight: 1.42,
           fontWeight: 760,
         }}
@@ -327,7 +330,7 @@ const SameModelDifferentResult: Page = () => (
       <h2
         style={{
           margin: 0,
-          fontSize: 'calc(var(--osd-size-hero) * 0.75)',
+          fontSize: hero(0.75),
           lineHeight: 1.06,
           letterSpacing: '-0.035em',
           fontWeight: 950,
@@ -352,7 +355,7 @@ const SameModelDifferentResult: Page = () => (
         style={{
           width: 1220,
           margin: '70px 0 0',
-          fontSize: 'calc(var(--osd-size-body) * 1.1)',
+          fontSize: body(1.1),
           lineHeight: 1.44,
           fontWeight: 780,
         }}
@@ -371,7 +374,7 @@ const HarnessDefinition: Page = () => (
       <h2
         style={{
           margin: '42px 0 0',
-          fontSize: 'calc(var(--osd-size-hero) * 0.73)',
+          fontSize: hero(0.73),
           lineHeight: 1.06,
           letterSpacing: '-0.035em',
           fontWeight: 950,
@@ -404,7 +407,7 @@ const HarnessDefinition: Page = () => (
         style={{
           width: 1240,
           margin: '62px 0 0',
-          fontSize: 'calc(var(--osd-size-body) * 1.08)',
+          fontSize: body(1.08),
           lineHeight: 1.42,
           fontWeight: 800,
         }}
@@ -421,7 +424,7 @@ const ThreeCompetitions: Page = () => (
       <h2
         style={{
           margin: 0,
-          fontSize: 'calc(var(--osd-size-hero) * 0.68)',
+          fontSize: hero(0.68),
           lineHeight: 1.08,
           letterSpacing: '-0.03em',
           fontWeight: 950,
@@ -463,7 +466,7 @@ const CostSecurity: Page = () => (
         <h2
           style={{
             margin: 0,
-            fontSize: 'calc(var(--osd-size-hero) * 0.65)',
+            fontSize: hero(0.65),
             lineHeight: 1.05,
             letterSpacing: '-0.032em',
             fontWeight: 950,
@@ -478,7 +481,7 @@ const CostSecurity: Page = () => (
         <p
           style={{
             margin: '52px 0 0',
-            fontSize: 'var(--osd-size-body)',
+            fontSize: body(),
             lineHeight: 1.45,
             fontWeight: 760,
           }}
@@ -516,7 +519,7 @@ const LocalLLM: Page = () => (
         <h2
           style={{
             margin: '42px 0 0',
-            fontSize: 'calc(var(--osd-size-hero) * 0.68)',
+            fontSize: hero(0.68),
             lineHeight: 1.06,
             letterSpacing: '-0.035em',
             fontWeight: 950,
@@ -531,7 +534,7 @@ const LocalLLM: Page = () => (
         <p
           style={{
             margin: '48px 0 0',
-            fontSize: 'var(--osd-size-body)',
+            fontSize: body(),
             lineHeight: 1.45,
             fontWeight: 760,
           }}
@@ -564,7 +567,7 @@ const LocalLLM: Page = () => (
           style={{
             marginTop: 24,
             fontFamily: mono,
-            fontSize: 'calc(var(--osd-size-body) * 0.63)',
+            fontSize: body(0.63),
             fontWeight: 900,
           }}
         >
@@ -581,7 +584,7 @@ const PersonalStart: Page = () => (
       <h2
         style={{
           margin: 0,
-          fontSize: 'calc(var(--osd-size-hero) * 0.69)',
+          fontSize: hero(0.69),
           lineHeight: 1.07,
           letterSpacing: '-0.033em',
           fontWeight: 950,
@@ -623,7 +626,7 @@ const SchoolStart: Page = () => (
         <h2
           style={{
             margin: 0,
-            fontSize: 'calc(var(--osd-size-hero) * 0.65)',
+            fontSize: hero(0.65),
             lineHeight: 1.07,
             letterSpacing: '-0.034em',
             fontWeight: 950,
@@ -638,7 +641,7 @@ const SchoolStart: Page = () => (
         <p
           style={{
             margin: '50px 0 0',
-            fontSize: 'var(--osd-size-body)',
+            fontSize: body(),
             lineHeight: 1.45,
             fontWeight: 760,
           }}
@@ -684,7 +687,7 @@ const Roadmap: Page = () => (
       <h2
         style={{
           margin: '42px 0 0',
-          fontSize: 'calc(var(--osd-size-hero) * 0.66)',
+          fontSize: hero(0.66),
           lineHeight: 1.06,
           letterSpacing: '-0.035em',
           fontWeight: 950,
@@ -714,7 +717,7 @@ const Roadmap: Page = () => (
             <div
               style={{
                 fontFamily: mono,
-                fontSize: 'calc(var(--osd-size-body) * 0.74)',
+                fontSize: body(0.74),
                 fontWeight: 950,
               }}
             >
@@ -723,7 +726,7 @@ const Roadmap: Page = () => (
             <h3
               style={{
                 margin: '44px 0 24px',
-                fontSize: 'calc(var(--osd-size-body) * 1.1)',
+                fontSize: body(1.1),
                 lineHeight: 1.1,
                 fontWeight: 950,
               }}
@@ -733,7 +736,7 @@ const Roadmap: Page = () => (
             <p
               style={{
                 margin: 0,
-                fontSize: 'calc(var(--osd-size-body) * 0.76)',
+                fontSize: body(0.76),
                 lineHeight: 1.42,
                 fontWeight: 740,
               }}
@@ -777,7 +780,7 @@ const FinalQuestion: Page = () => (
         style={{
           marginTop: 24,
           fontFamily: mono,
-          fontSize: 'calc(var(--osd-size-body) * 0.63)',
+          fontSize: body(0.63),
           fontWeight: 900,
         }}
       >
@@ -789,7 +792,7 @@ const FinalQuestion: Page = () => (
       <h2
         style={{
           margin: '52px 0 34px',
-          fontSize: 'calc(var(--osd-size-hero) * 0.93)',
+          fontSize: hero(0.93),
           lineHeight: 1.02,
           letterSpacing: '-0.04em',
           fontWeight: 950,
@@ -803,7 +806,7 @@ const FinalQuestion: Page = () => (
         style={{
           width: 950,
           margin: 0,
-          fontSize: 'calc(var(--osd-size-body) * 1.13)',
+          fontSize: body(1.13),
           lineHeight: 1.42,
           fontWeight: 780,
         }}
