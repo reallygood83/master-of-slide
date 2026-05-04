@@ -34,7 +34,7 @@ editable.
 
 In dev, the same menu can connect Canva and open the current deck in Canva. Set
 `CANVA_CLIENT_ID` and `CANVA_CLIENT_SECRET`, register
-`http://localhost:5173/api/canva/callback` as a Canva app redirect URI, restart
+`http://127.0.0.1:5173/api/canva/callback` as a Canva app redirect URI, restart
 the dev server, then choose **Connect Canva** and **Open in Canva**.
 
 ## Config

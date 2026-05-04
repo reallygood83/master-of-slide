@@ -75,7 +75,7 @@ Run the checklist in `slide-authoring` ("Self-review before finishing"). It cove
 Tell the user:
 
 - The slide id and file path you created.
-- That the dev server will hot-reload — they can open `http://localhost:5173/s/<id>` (or refresh the home page).
+- That the dev server will hot-reload — they can open `http://127.0.0.1:5173/s/<id>` (or refresh the home page).
 - If dev isn't running: `pnpm dev` from the repo root.
 
 Don't run the dev server yourself unless asked.

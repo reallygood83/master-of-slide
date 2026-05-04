@@ -90,4 +90,4 @@ Tell the user:
 - slide id and created path
 - how many pages were generated
 - which assets were copied, generated, or left as placeholders
-- preview URL: `http://localhost:5173/s/<id>`
+- preview URL: `http://127.0.0.1:5173/s/<id>`

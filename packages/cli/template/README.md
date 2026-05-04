@@ -78,7 +78,7 @@ The browser download menu exports HTML, PDF, and PPTX. PPTX uses one full-slide
 image per page so the React design survives import into PowerPoint or Canva.
 
 For direct Canva handoff during development, create a Canva Connect API app,
-register `http://localhost:5173/api/canva/callback` as a redirect URI, then run:
+register `http://127.0.0.1:5173/api/canva/callback` as a redirect URI, then run:
 
 ```bash
 CANVA_CLIENT_ID=... CANVA_CLIENT_SECRET=... pnpm dev
