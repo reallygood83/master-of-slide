@@ -35,7 +35,7 @@ export async function importToCanva(file: string, opts: CanvaImportOptions = {})
 
   const abs = path.resolve(process.cwd(), file);
   const bytes = await readFile(abs);
-  const title = opts.title ?? path.basename(abs, path.extname(abs));
+  const title = canvaTitle(opts.title ?? path.basename(abs, path.extname(abs)));
 
   const created = await createImportJob(bytes, title, token);
   process.stdout.write(`Canva import job started: ${created.id}\n`);
@@ -104,6 +104,11 @@ async function waitForImportJob(
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function canvaTitle(title: string): string {
+  const trimmed = title.trim() || 'Master Of Slide deck';
+  return [...trimmed].slice(0, 50).join('');
 }
 
 function openUrl(url: string): void {

@@ -192,7 +192,7 @@ export function canvaPlugin(opts: CanvaPluginOptions = {}): Plugin {
             if (!isConnected(tokenState)) {
               return json(res, 401, { error: 'Canva is not connected.' });
             }
-            const title = url.searchParams.get('title') || 'Master Of Slide deck';
+            const title = canvaTitle(url.searchParams.get('title') || 'Master Of Slide deck');
             const bytes = await readBody(req);
             const job = await createImportJob(bytes, title, tokenState.accessToken);
             const done = await waitForImportJob(job.id, tokenState.accessToken);
@@ -227,6 +227,11 @@ export function canvaPlugin(opts: CanvaPluginOptions = {}): Plugin {
     if (!id || !secret) throw new Error('Canva credentials are missing.');
     return { id, secret };
   }
+}
+
+function canvaTitle(title: string): string {
+  const trimmed = title.trim() || 'Master Of Slide deck';
+  return [...trimmed].slice(0, 50).join('');
 }
 
 function requestOrigin(req: Connect.IncomingMessage): string {

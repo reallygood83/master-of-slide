@@ -44,8 +44,11 @@ export async function importSlideToCanva(
   slideId: string,
   opts: { lang?: string } = {},
 ): Promise<string> {
+  // Canva receives the same visually flattened PPTX used by Download.
+  // Each React page is rendered to a full-slide PNG first, so Canva import
+  // should preserve the visual slide instead of trying to interpret JSX/CSS.
   const blob = await createPptxBlob(slide, slideId, opts);
-  const title = slide.meta?.title ?? slideId;
+  const title = canvaTitle(slide.meta?.title ?? slideId);
   const res = await fetch(`/api/canva/import?title=${encodeURIComponent(title)}`, {
     method: 'POST',
     headers: { 'Content-Type': PPTX_MIME },
@@ -56,4 +59,9 @@ export async function importSlideToCanva(
     throw new Error(data.error ?? `Canva import failed (${res.status}).`);
   }
   return data.editUrl;
+}
+
+function canvaTitle(title: string): string {
+  const trimmed = title.trim() || 'Master Of Slide deck';
+  return [...trimmed].slice(0, 50).join('');
 }
