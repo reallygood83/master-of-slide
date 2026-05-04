@@ -60,7 +60,7 @@ export async function createViteConfig(opts: CreateViteConfigOptions): Promise<I
       tailwindcss(),
       openSlidePlugin({ userCwd, config }),
       canvaPlugin({ env, userCwd }),
-      designPlugin({ userCwd }),
+      designPlugin({ userCwd, slidesDir }),
       commentsPlugin({ userCwd, slidesDir }),
       filesPlugin({ userCwd, slidesDir }),
     ],

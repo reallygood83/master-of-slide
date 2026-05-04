@@ -99,6 +99,7 @@ async function renderPagesToPng(
       await waitForFonts();
       await waitForAnimations(host);
       await nextPaint();
+      materializeComputedStyles(host);
 
       result.push(
         await toPng(host, {
@@ -116,6 +117,26 @@ async function renderPagesToPng(
     container.remove();
   }
   return result;
+}
+
+function materializeComputedStyles(root: HTMLElement): void {
+  const elements = [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))];
+  for (const el of elements) {
+    const computed = getComputedStyle(el);
+    el.style.fontFamily = computed.fontFamily;
+    el.style.fontSize = computed.fontSize;
+    el.style.fontWeight = computed.fontWeight;
+    el.style.lineHeight = computed.lineHeight;
+    el.style.letterSpacing = computed.letterSpacing;
+    el.style.color = computed.color;
+    el.style.backgroundColor = computed.backgroundColor;
+    el.style.borderTopColor = computed.borderTopColor;
+    el.style.borderRightColor = computed.borderRightColor;
+    el.style.borderBottomColor = computed.borderBottomColor;
+    el.style.borderLeftColor = computed.borderLeftColor;
+    el.style.boxShadow = computed.boxShadow;
+    el.style.borderRadius = computed.borderRadius;
+  }
 }
 
 function nextPaint(frames = 1): Promise<void> {

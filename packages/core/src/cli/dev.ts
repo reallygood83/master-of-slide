@@ -12,6 +12,7 @@ export async function dev(opts: DevOptions = {}): Promise<void> {
   const config = mergeConfig(base, {
     server: {
       ...(opts.port !== undefined ? { port: opts.port } : {}),
+      ...(opts.port !== undefined ? { strictPort: true } : {}),
       ...(opts.host !== undefined ? { host: opts.host } : {}),
       ...(opts.open !== undefined ? { open: opts.open } : {}),
     },

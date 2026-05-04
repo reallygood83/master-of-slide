@@ -63,7 +63,7 @@ function toId(absFile: string, slidesRoot: string): string {
   return rel.split(path.sep)[0];
 }
 
-function generateSlidesModule(files: string[], slidesRoot: string, isDev: boolean): string {
+export function generateSlidesModule(files: string[], slidesRoot: string, isDev: boolean): string {
   const entries = files.map((abs) => {
     const id = toId(abs, slidesRoot);
     const importPath = isDev ? `/@fs${abs}` : abs;
@@ -81,7 +81,15 @@ export const slideIds = ${ids};
 export async function loadSlide(id) {
   switch (id) {
 ${cases}
-    default: throw new Error('Slide not found: ' + id);
+    default: {
+      const known = slideIds.length > 0 ? slideIds.join(', ') : '(none)';
+      throw new Error(
+        'Slide not found: ' + id + '\\n' +
+        'Known slides: ' + known + '\\n' +
+        'Expected file: ${slidesRoot.split(path.sep).join('/')}/' + id + '/index.tsx\\n' +
+        'If the file exists, restart open-slide dev so the slide manifest is regenerated.'
+      );
+    }
   }
 }
 `;
@@ -159,8 +167,14 @@ export function openSlidePlugin(opts: OpenSlidePluginOptions): Plugin {
           server.ws.send({ type: 'full-reload' });
         }, 150);
       };
-      server.watcher.add(path.join(slidesRoot, '*/index.{tsx,jsx,ts,js}'));
+      server.watcher.add([slidesRoot, path.join(slidesRoot, '*/index.{tsx,jsx,ts,js}')]);
+      server.watcher.on('addDir', (p) => {
+        if (path.dirname(p) === slidesRoot) reload();
+      });
       server.watcher.on('add', (p) => {
+        if (isSlideEntry(p)) reload();
+      });
+      server.watcher.on('change', (p) => {
         if (isSlideEntry(p)) reload();
       });
       server.watcher.on('unlink', (p) => {
