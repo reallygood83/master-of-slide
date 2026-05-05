@@ -155,19 +155,59 @@ async function waitForFonts(): Promise<void> {
   if ('fonts' in document) await document.fonts.ready;
 }
 
-async function waitForAnimations(root: HTMLElement): Promise<void> {
-  const animations = root.getAnimations({ subtree: true });
+const ANIMATION_WAIT_TIMEOUT_MS = 1500;
+
+async function waitForAnimations(
+  root: HTMLElement,
+  timeoutMs = ANIMATION_WAIT_TIMEOUT_MS,
+): Promise<void> {
+  const animations = root.getAnimations?.({ subtree: true }) ?? [];
   if (animations.length === 0) return;
 
-  await Promise.all(
-    animations.map(async (animation) => {
+  // Looping animations (pulse, glow, blink, caret, drift, shimmer, …) never
+  // resolve `animation.finished`. Force them to a stable terminal frame before
+  // we wait so they do not hang the export.
+  for (const animation of animations) {
+    if (isLoopingAnimation(animation)) {
       try {
-        await animation.finished;
+        animation.finish();
       } catch {
-        // Ignore cancelled animations; the current rendered state is still safe to capture.
+        try {
+          animation.cancel();
+        } catch {
+          // Ignore — the current rendered frame is still safe to capture.
+        }
       }
-    }),
-  );
+    }
+  }
+
+  const remaining = root.getAnimations?.({ subtree: true }) ?? [];
+  if (remaining.length === 0) return;
+
+  await Promise.race([
+    Promise.all(
+      remaining.map((animation) =>
+        animation.finished.then(
+          () => undefined,
+          () => undefined,
+        ),
+      ),
+    ),
+    new Promise<void>((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+}
+
+function isLoopingAnimation(animation: Animation): boolean {
+  const effect = animation.effect;
+  if (!effect) return false;
+  try {
+    const timing = effect.getComputedTiming();
+    if (timing.iterations === Infinity) return true;
+    if (timing.endTime === Infinity) return true;
+  } catch {
+    // Some browsers throw on getComputedTiming for cancelled effects.
+  }
+  return false;
 }
 
 async function waitForImages(root: HTMLElement): Promise<void> {

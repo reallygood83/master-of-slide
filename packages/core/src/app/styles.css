@@ -3,6 +3,16 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+/*
+ * Korean web fonts loaded via CDN @font-face so PPTX export renders Korean
+ * slides correctly on machines that do not have Pretendard or Noto Sans KR
+ * installed locally. Both URLs declare the family names ("Pretendard" and
+ * "Noto Sans KR") that slide source files reference directly, and the woff2
+ * sources are awaited via document.fonts.ready before slide capture.
+ */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap");
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
