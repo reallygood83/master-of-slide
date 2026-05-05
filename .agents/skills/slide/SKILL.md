@@ -45,9 +45,12 @@ the current agent environment, still ask for the intended image count, then
 create that many precise `ImagePlaceholder` hints instead of bitmap assets.
 
 When an ask-user-question UI is available, ask the theme question as a choice
-picker. Show every available theme option, not only files under `themes/*.md`.
-If the current ask-user-question implementation limits the number of choices,
-use a two-step picker:
+picker. ALWAYS surface all 9 theme options below — never limit the picker to
+just the files present in the user's workspace `themes/` directory. The slide
+skill ships with bundled fallback theme docs (see "Theme fallback resolution"
+below), so every option is always applicable. If the current
+ask-user-question implementation limits the number of choices, use a two-step
+picker:
 
 1. Ask for a theme group: `auto/recommended`, `official themes`, or
    `demo-derived themes`.
@@ -109,16 +112,30 @@ multiple-choice question. Use these theme options:
    - one idea per page
    - top-level `export const design: DesignSystem = { ... }`
    - Korean-safe typography when the note is Korean
-   - if a non-`auto` official theme is selected, read `themes/<theme-id>.md`
-     before writing JSX and apply its palette, typography, layout, components,
-     and motion philosophy
-   - if a demo-derived theme is selected and no `themes/<theme-id>.md` exists,
-     read the listed demo source slide first and extract its palette,
-     typography, layout rhythm, component treatment, and motion rules before
-     writing JSX
-   - if `auto` is selected, inspect available official themes and demo-derived
-     theme sources, pick one explicit theme, and state the selected theme in
-     the final output
+   - if a non-`auto` theme is selected, resolve the theme doc using
+     "Theme fallback resolution" below and apply its palette, typography,
+     layout, components, and motion philosophy
+   - if `auto` is selected, inspect the available themes (workspace + bundled),
+     pick one explicit theme, and state the selected theme in the final output
+
+## Theme fallback resolution
+
+When the user picks a theme other than `auto`, resolve the theme document in
+this order (use the first one that exists):
+
+1. **Workspace official theme** — `<workspace>/themes/<theme-id>.md`
+   (present in this repo for `editorial-noir`, `paper-press`, `neon-terminal`).
+2. **Skill-bundled official theme** — `<this-skill>/themes/<theme-id>.md`
+   (always present after `pnpm install:agents`).
+3. **Skill-bundled demo-derived theme** — `<this-skill>/theme-references/<theme-id>.md`
+   (covers `neo-brutalism`, `research-brief`, `vercel-minimal`,
+   `raycast-dark-product`, `photo-editorial-tech`).
+4. **Workspace demo slide** — only when the workspace contains
+   `apps/demo/slides/<reference-slide>/index.tsx` referenced for that theme.
+
+You MUST never tell the user "this theme is unavailable" because of missing
+local files — the bundled docs in steps 2 and 3 always cover all 8 explicit
+themes. Always read the resolved theme doc end-to-end before writing JSX.
 5. Use `create-slide-image-prompts` for exactly the requested number of
    generated image slots, unless the source note provides enough real assets to
    make generation unnecessary:

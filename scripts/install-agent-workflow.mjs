@@ -26,11 +26,16 @@ async function copyDir(src, dest) {
   await cp(src, dest, { recursive: true, force: true });
 }
 
+const installLocations = [
+  path.join(home, '.codex', 'skills'),
+  path.join(home, '.claude', 'skills'),
+];
+
 for (const skill of skills) {
-  await copyDir(
-    path.join(root, '.agents', 'skills', skill),
-    path.join(home, '.codex', 'skills', skill),
-  );
+  const src = path.join(root, '.agents', 'skills', skill);
+  for (const base of installLocations) {
+    await copyDir(src, path.join(base, skill));
+  }
 }
 
 const commandSrc = path.join(root, '.claude', 'commands', 'slide.md');
@@ -40,8 +45,15 @@ await cp(commandSrc, commandDest, { force: true });
 
 console.log('Installed Master Of Slide agent workflow:');
 for (const skill of skills) {
-  console.log(`- ~/.codex/skills/${skill}/SKILL.md`);
+  for (const base of installLocations) {
+    const rel = path.relative(home, path.join(base, skill));
+    console.log(`- ~/${rel}/`);
+  }
 }
 console.log('- ~/.claude/commands/slide.md');
+console.log('');
+console.log('Bundled themes (9 total) ship inside the slide skill:');
+console.log('- themes/{editorial-noir,paper-press,neon-terminal}.md');
+console.log('- theme-references/{neo-brutalism,research-brief,vercel-minimal,raycast-dark-product,photo-editorial-tech}.md');
 console.log('');
 console.log('Restart Codex or Claude Code before using the new workflow.');
