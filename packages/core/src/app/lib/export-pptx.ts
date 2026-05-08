@@ -556,28 +556,24 @@ async function waitForFonts(): Promise<void> {
 
 async function waitForAnimations(root: HTMLElement): Promise<void> {
   // Export must capture the FINAL visual state — never a mid-flight frame.
-  // Three layers of defense, in order:
   //
-  //   1. animation.finish() snaps every running animation to its terminal
-  //      frame. With fill-mode "both" / "forwards" the to-state pins.
+  // Why the previous "finish() + style.animation=none" approach wasn't enough:
+  // html-to-image clones the host DOM into an SVG <foreignObject> for raster.
+  // The clone re-evaluates CSS — animation state is NOT carried over from the
+  // source. So even though we finished animations on the source, the clone
+  // saw `class="r-fadeup"` and a CSS rule `animation: rFadeUp 900ms both` and
+  // started a brand-new animation cycle from `from { opacity: 0 }`. The PNG
+  // captured that initial invisible frame, which is why MP4 export was
+  // missing every animated word while the static footer/hero photo stayed.
   //
-  //   2. Some keyframes (notably `from { opacity: 0 }` entry effects with
-  //      explicit animationDelay) still leave the captured PNG reading
-  //      opacity ≈ 0 after finish() resolves on Chromium's offscreen
-  //      compositor — because the keyframe rules outrank our `to` pose
-  //      until the next style recalc. To kill that race, we strip the
-  //      `animation` property off every descendant. The element falls back
-  //      to its baseline pose (opacity 1, transform none) which is exactly
-  //      the pose every entry animation was animating *into*.
+  // Fix: inject a <style> sheet INTO the host that forces every animation to
+  // its terminal frame instantly via negative delay + 1ms duration + forwards
+  // fill. This is the standard CSS-only animation-skipper used by Storybook
+  // visual tests and Playwright snapshots — the rule travels with the clone,
+  // so the clone's animation also "finishes" before the rasterizer paints.
   //
-  //   3. Finally we sweep computed opacity. Anything still reading below
-  //      ~1 is forced to opacity 1 inline. This catches the rare case
-  //      where the in-flight keyframe stamped an inline opacity on the
-  //      element from a previous run.
-  //
-  // Without all three layers MP4 export came back with every fade-in
-  // text invisible — only static (non-animated) elements like the footer
-  // chips and hero <img> survived.
+  // We still finish() animations on the source as a belt-and-braces measure
+  // for `getAnimations()`-driven JS animations.
   const animations = root.getAnimations?.({ subtree: true }) ?? [];
   for (const animation of animations) {
     try {
@@ -586,31 +582,44 @@ async function waitForAnimations(root: HTMLElement): Promise<void> {
       try {
         animation.cancel();
       } catch {
-        // Ignore — the next two layers will recover the visible pose.
+        // Ignore — the injected stylesheet below will recover the pose.
       }
     }
   }
 
-  const elements = [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))];
-  for (const el of elements) {
-    // Layer 2 — disable any remaining animation declaration.
-    el.style.animation = 'none';
-    el.style.transition = 'none';
-  }
+  // Inject the kill-switch stylesheet. Scoped under [data-osd-canvas] so it
+  // can never leak into the editing surface; it lives only on the offscreen
+  // export host and gets thrown away with it.
+  const killer = document.createElement('style');
+  killer.setAttribute('data-osd-export-killer', '');
+  killer.textContent = `
+    [data-osd-canvas], [data-osd-canvas] *, [data-osd-canvas] *::before, [data-osd-canvas] *::after {
+      animation-delay: -1s !important;
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      animation-fill-mode: forwards !important;
+      animation-play-state: running !important;
+      transition: none !important;
+    }
+  `;
+  root.appendChild(killer);
 
-  // Force a style recalc before the opacity sweep so getComputedStyle reads
-  // the post-`animation: none` value rather than the cached keyframe value.
+  // Force a style recalc so the new rules apply before any opacity sweep
+  // and before html-to-image clones the tree.
   void root.offsetHeight;
 
+  // Defense in depth: pin opacity to 1 on every element that the export should
+  // surface. We can't trust computed-opacity heuristics here — `from { opacity: 0 }`
+  // entry keyframes resolve to 0 during animation-delay, so a "skip if op == 0"
+  // rule would silently drop animated text. Instead we pin opacity to 1 across
+  // the board, and EXPLICITLY preserve any inline opacity authored on the
+  // element (those are intentional design tokens like 0.05 overlays).
+  const elements = [root, ...Array.from(root.querySelectorAll<HTMLElement>('*'))];
   for (const el of elements) {
-    // Layer 3 — pin opacity. Skip elements that intentionally render
-    // hidden (e.g. design tokens like 0.05 highlight overlays); we only
-    // recover content that the design actually wanted visible.
-    const cs = getComputedStyle(el);
-    const op = parseFloat(cs.opacity || '1');
-    if (op > 0 && op < 0.99) {
-      el.style.opacity = '1';
-    }
+    if (el.dataset.osdExportKiller !== undefined) continue;
+    const inlineOpacity = el.style.opacity;
+    if (inlineOpacity && inlineOpacity !== '' && parseFloat(inlineOpacity) < 1) continue;
+    el.style.setProperty('opacity', '1', 'important');
   }
 }
 
